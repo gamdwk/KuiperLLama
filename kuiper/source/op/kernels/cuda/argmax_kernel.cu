@@ -1,3 +1,4 @@
+#include <cstddef>
 #include "../kernels_interface.h"
 #include "argmax_kernel.cuh"
 #include "tensor/tensor.h"
@@ -69,7 +70,10 @@ __global__ void argmax_kernel_fp32(const float* input_ptr, size_t size, size_t* 
     *output_idx = max_index;
   }
 }
-
+__global__ void my_argmax(const float* input_ptr, size_t size, size_t output_idx){
+  
+}
+//所有数据中最大的数据的位置index
 size_t argmax_kernel_cu(const float* input_ptr, size_t size, void* stream) {
   std::shared_ptr<base::DeviceAllocator> alloc_cu =
       base::CUDADeviceAllocatorFactory::get_instance();

@@ -46,16 +46,25 @@ __global__ void multi_head_attention_kernel(int32_t pos, int32_t seq_len, float*
                                             float* value_cache, int32_t kv_dim, int32_t kv_mul,
                                             int32_t head_num, int32_t head_size,
                                             int32_t layer_offset) {
+  //一个block处理一个head
   int head = blockIdx.x;
   if (head >= head_num) {
     return;
   }
 
   float* query_head = query + head * head_size;
+  // seq_len = 2048
   float* score_head = score_ptr + head * seq_len;
+  // scale = 1/sqrt(head_len)
   float scale = 1.f / sqrtf(head_size);
+  // kv_mul是llama2设置好的,=1, Key-Value的倍数
+  // kv_dim=4096
+  // head_size = 128
+  // head_num = 32
   int32_t head_offset = (head / kv_mul) * head_size;
   for (int t = threadIdx.x; t <= pos; t += blockDim.x) {
+    // layer_offset = layer_index * seq_len * kv_dim,每个layer的长度是seq_len * kv_dim
+    // key_head = key_cache layer_offset
     float* key_head = key_cache + layer_offset + t * kv_dim + head_offset;
 
     float score = 0.0f;
